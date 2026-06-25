@@ -1,0 +1,481 @@
+-- ⚡ FLICK SEARCH - ULTIMATE HACKER EDITION ⚡
+-- 🔥 FAST AIMBOT (VISIBLE ONLY) + ESP
+-- 👨‍💻 UNKNOWSCRIPTER
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+
+local function PlayHackerSound()
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://9120803075"
+    sound.Volume = 0.3
+    sound.PlayOnRemove = true
+    sound.Parent = LocalPlayer
+    sound:Play()
+    task.wait(0.1)
+    sound:Destroy()
+end
+
+local function PlayActivationSound()
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://9120803189"
+    sound.Volume = 0.5
+    sound.PlayOnRemove = true
+    sound.Parent = LocalPlayer
+    sound:Play()
+    task.wait(0.1)
+    sound:Destroy()
+end
+
+local settings = {
+    aimbotEnabled = false,
+    espEnabled = false,
+    aimFov = 300,
+    espColor = Color3.fromRGB(0, 255, 0)
+}
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "FlickSearchGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 350, 0, 350)
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -175)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 5, 15)
+mainFrame.BackgroundTransparency = 0.05
+mainFrame.BorderSizePixel = 2
+mainFrame.BorderColor3 = Color3.fromRGB(0, 255, 0)
+mainFrame.ClipsDescendants = true
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+local glowBorder = Instance.new("ImageLabel")
+glowBorder.Size = UDim2.new(1.1, 0, 1.1, 0)
+glowBorder.Position = UDim2.new(-0.05, 0, -0.05, 0)
+glowBorder.BackgroundTransparency = 1
+glowBorder.Image = "rbxassetid://1316048674"
+glowBorder.ImageColor3 = Color3.fromRGB(0, 255, 0)
+glowBorder.ImageTransparency = 0.5
+glowBorder.ZIndex = 0
+glowBorder.Parent = mainFrame
+
+local scanLine = Instance.new("Frame")
+scanLine.Size = UDim2.new(1, 0, 0, 2)
+scanLine.Position = UDim2.new(0, 0, 0, 0)
+scanLine.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+scanLine.BackgroundTransparency = 0.6
+scanLine.ZIndex = 5
+scanLine.Parent = mainFrame
+
+task.spawn(function()
+    while mainFrame and mainFrame.Parent do
+        scanLine.Position = UDim2.new(0, 0, scanLine.Position.Y.Scale + 0.003, 0)
+        if scanLine.Position.Y.Scale > 1 then
+            scanLine.Position = UDim2.new(0, 0, 0, 0)
+        end
+        task.wait(0.03)
+    end
+end)
+
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 45)
+titleBar.BackgroundColor3 = Color3.fromRGB(0, 20, 40)
+titleBar.BackgroundTransparency = 0.1
+titleBar.BorderSizePixel = 1
+titleBar.BorderColor3 = Color3.fromRGB(0, 255, 0)
+titleBar.ZIndex = 2
+titleBar.Parent = mainFrame
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -80, 1, 0)
+titleLabel.Position = UDim2.new(0, 15, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "⚡ UNKNOWSCRIPTER ⚡"
+titleLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+titleLabel.TextSize = 18
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.TextYAlignment = Enum.TextYAlignment.Center
+titleLabel.Parent = titleBar
+
+local subTitle = Instance.new("TextLabel")
+subTitle.Size = UDim2.new(1, -80, 0, 15)
+subTitle.Position = UDim2.new(0, 15, 0, 28)
+subTitle.BackgroundTransparency = 1
+subTitle.Text = "🔓 HACKER MODE ACTIVE"
+subTitle.TextColor3 = Color3.fromRGB(0, 200, 100)
+subTitle.TextSize = 10
+subTitle.Font = Enum.Font.GothamBold
+subTitle.TextXAlignment = Enum.TextXAlignment.Left
+subTitle.TextYAlignment = Enum.TextYAlignment.Center
+subTitle.Parent = titleBar
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -38, 0, 7)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeBtn.BackgroundTransparency = 0.3
+closeBtn.BorderSizePixel = 1
+closeBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.TextSize = 16
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.ZIndex = 3
+closeBtn.Parent = titleBar
+closeBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = not mainFrame.Visible
+    PlayHackerSound()
+end)
+
+local minBtn = Instance.new("TextButton")
+minBtn.Size = UDim2.new(0, 30, 0, 30)
+minBtn.Position = UDim2.new(1, -72, 0, 7)
+minBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+minBtn.BackgroundTransparency = 0.3
+minBtn.BorderSizePixel = 1
+minBtn.BorderColor3 = Color3.fromRGB(255, 200, 0)
+minBtn.Text = "─"
+minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minBtn.TextSize = 20
+minBtn.Font = Enum.Font.GothamBold
+minBtn.ZIndex = 3
+minBtn.Parent = titleBar
+minBtn.MouseButton1Click:Connect(function()
+    if mainFrame.Size == UDim2.new(0, 350, 0, 350) then
+        mainFrame.Size = UDim2.new(0, 350, 0, 45)
+    else
+        mainFrame.Size = UDim2.new(0, 350, 0, 350)
+    end
+    PlayHackerSound()
+end)
+
+local function CreateToggleButton(text, yPos)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0.9, 0, 0, 50)
+    frame.Position = UDim2.new(0.05, 0, yPos, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 10, 25)
+    frame.BackgroundTransparency = 0.2
+    frame.BorderSizePixel = 1
+    frame.BorderColor3 = Color3.fromRGB(0, 255, 0)
+    frame.Parent = mainFrame
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.5, 0, 1, 0)
+    label.Position = UDim2.new(0.05, 0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(0, 255, 0)
+    label.TextSize = 16
+    label.Font = Enum.Font.GothamBold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextYAlignment = Enum.TextYAlignment.Center
+    label.Parent = frame
+
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0.25, 0, 0.7, 0)
+    toggleBtn.Position = UDim2.new(0.7, 0, 0.15, 0)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    toggleBtn.BackgroundTransparency = 0.2
+    toggleBtn.BorderSizePixel = 2
+    toggleBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
+    toggleBtn.Text = "OFF"
+    toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleBtn.TextSize = 16
+    toggleBtn.Font = Enum.Font.GothamBold
+    toggleBtn.Parent = frame
+
+    local indicator = Instance.new("Frame")
+    indicator.Size = UDim2.new(0, 12, 0, 12)
+    indicator.Position = UDim2.new(0.95, 0, 0.5, -6)
+    indicator.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    indicator.BorderSizePixel = 0
+    indicator.Parent = frame
+
+    return toggleBtn, indicator, frame
+end
+
+local aimbotState = false
+local espState = false
+
+local aimbotBtn, aimbotIndicator, aimbotFrame = CreateToggleButton("🎯 AIMBOT", 0.15)
+local espBtn, espIndicator, espFrame = CreateToggleButton("👁️ ESP", 0.38)
+
+local statusDisplay = Instance.new("TextLabel")
+statusDisplay.Size = UDim2.new(0.9, 0, 0, 35)
+statusDisplay.Position = UDim2.new(0.05, 0, 0.72, 0)
+statusDisplay.BackgroundColor3 = Color3.fromRGB(0, 20, 40)
+statusDisplay.BackgroundTransparency = 0.2
+statusDisplay.BorderSizePixel = 1
+statusDisplay.BorderColor3 = Color3.fromRGB(0, 255, 0)
+statusDisplay.Text = "🟢 SYSTEM: READY"
+statusDisplay.TextColor3 = Color3.fromRGB(0, 255, 0)
+statusDisplay.TextSize = 14
+statusDisplay.Font = Enum.Font.GothamBold
+statusDisplay.Parent = mainFrame
+
+local credits = Instance.new("TextLabel")
+credits.Size = UDim2.new(1, 0, 0, 20)
+credits.Position = UDim2.new(0, 0, 1, -22)
+credits.BackgroundTransparency = 1
+credits.Text = "👨‍💻 UNKNOWSCRIPTER | 🔓 2026"
+credits.TextColor3 = Color3.fromRGB(0, 200, 0)
+credits.TextSize = 11
+credits.Font = Enum.Font.Gotham
+credits.Parent = mainFrame
+
+local function IsPlayerVisible(player)
+    if not player or not player.Character then return false end
+    
+    local head = player.Character:FindFirstChild("Head")
+    if not head then return false end
+    
+    local cameraPos = Camera.CFrame.Position
+    local direction = (head.Position - cameraPos).Unit
+    
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    raycastParams.IgnoreWater = true
+    
+    local rayResult = workspace:Raycast(cameraPos, direction * 1000, raycastParams)
+    
+    if rayResult then
+        local hit = rayResult.Instance
+        local character = player.Character
+        if hit and hit:IsDescendantOf(character) then
+            return true
+        end
+    end
+    
+    return false
+end
+
+local function GetClosestVisiblePlayer()
+    local closest = nil
+    local closestDist = settings.aimFov
+    local mousePos = Vector2.new(Mouse.X, Mouse.Y)
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") and
+           player.Character.Humanoid.Health > 0 and player.Character:FindFirstChild("Head") then
+            
+            if IsPlayerVisible(player) then
+                local head = player.Character.Head
+                local headPos, onScreen = Camera:WorldToScreenPoint(head.Position)
+                
+                if onScreen then
+                    local dist = (Vector2.new(headPos.X, headPos.Y) - mousePos).Magnitude
+                    
+                    if dist < closestDist then
+                        closestDist = dist
+                        closest = player
+                    end
+                end
+            end
+        end
+    end
+    
+    return closest
+end
+
+local function UpdateAimbot()
+    if not settings.aimbotEnabled then return end
+    
+    local target = GetClosestVisiblePlayer()
+    if target and target.Character and target.Character:FindFirstChild("Head") then
+        local head = target.Character.Head
+        local headPos = head.Position
+        
+        local currentPos = Camera.CFrame.Position
+        local direction = (headPos - currentPos).Unit
+        
+        Camera.CFrame = CFrame.lookAt(currentPos, currentPos + direction)
+    end
+end
+
+local espObjects = {}
+local espFolder = Instance.new("Folder")
+espFolder.Name = "ESP_Folder"
+espFolder.Parent = LocalPlayer
+
+local function CreateESP(player)
+    if player == LocalPlayer then return end
+    if espObjects[player] then return end
+    if not settings.espEnabled then return end
+    
+    local character = player.Character
+    if not character then return end
+    
+    local esp = {}
+    
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESP_Highlight"
+    highlight.FillColor = settings.espColor
+    highlight.FillTransparency = 0.5
+    highlight.OutlineColor = settings.espColor
+    highlight.OutlineTransparency = 0
+    highlight.Adornee = character
+    highlight.Parent = espFolder
+    
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESP_Name"
+    billboard.Size = UDim2.new(0, 120, 0, 30)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = character:FindFirstChild("Head") or character
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = player.Name
+    textLabel.TextColor3 = settings.espColor
+    textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    textLabel.TextStrokeTransparency = 0.3
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.TextSize = 14
+    textLabel.Parent = billboard
+    
+    local healthBar = Instance.new("Frame")
+    healthBar.Size = UDim2.new(0, 60, 0, 4)
+    healthBar.Position = UDim2.new(0.5, -30, 1, 2)
+    healthBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    healthBar.BorderSizePixel = 0
+    healthBar.Parent = billboard
+    
+    local healthBg = Instance.new("Frame")
+    healthBg.Size = UDim2.new(1, 0, 1, 0)
+    healthBg.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    healthBg.BorderSizePixel = 0
+    healthBg.Parent = healthBar
+    
+    esp.highlight = highlight
+    esp.billboard = billboard
+    esp.healthBar = healthBar
+    espObjects[player] = esp
+end
+
+local function RemoveESP(player)
+    if espObjects[player] then
+        if espObjects[player].highlight then
+            espObjects[player].highlight:Destroy()
+        end
+        if espObjects[player].billboard then
+            espObjects[player].billboard:Destroy()
+        end
+        espObjects[player] = nil
+    end
+end
+
+local function UpdateESP()
+    if not settings.espEnabled then
+        for player, _ in pairs(espObjects) do
+            RemoveESP(player)
+        end
+        return
+    end
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            if player.Character and player.Character:FindFirstChild("Humanoid") and
+               player.Character.Humanoid.Health > 0 then
+                CreateESP(player)
+            else
+                RemoveESP(player)
+            end
+        end
+    end
+end
+
+local function ToggleAimbot()
+    aimbotState = not aimbotState
+    settings.aimbotEnabled = aimbotState
+    
+    if aimbotState then
+        aimbotBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        aimbotBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
+        aimbotBtn.Text = "ON"
+        aimbotIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        statusDisplay.Text = "🟢 SYSTEM: AIMBOT ACTIVE"
+        PlayActivationSound()
+    else
+        aimbotBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        aimbotBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
+        aimbotBtn.Text = "OFF"
+        aimbotIndicator.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        statusDisplay.Text = "🟢 SYSTEM: READY"
+        PlayHackerSound()
+    end
+end
+
+local function ToggleESP()
+    espState = not espState
+    settings.espEnabled = espState
+    
+    if espState then
+        espBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        espBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
+        espBtn.Text = "ON"
+        espIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        PlayActivationSound()
+        UpdateESP()
+    else
+        espBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        espBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
+        espBtn.Text = "OFF"
+        espIndicator.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        PlayHackerSound()
+        for player, _ in pairs(espObjects) do
+            RemoveESP(player)
+        end
+    end
+end
+
+aimbotBtn.MouseButton1Click:Connect(ToggleAimbot)
+espBtn.MouseButton1Click:Connect(ToggleESP)
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        UpdateESP()
+    end)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    RemoveESP(player)
+end)
+
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    UpdateESP()
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.F1 then 
+        ToggleAimbot()
+    end
+    if input.KeyCode == Enum.KeyCode.F2 then 
+        ToggleESP()
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    UpdateAimbot()
+    UpdateESP()
+end)
+
+mainFrame.BackgroundTransparency = 1
+local openTween = TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+    BackgroundTransparency = 0.05
+})
+openTween:Play()
+PlayActivationSound()
