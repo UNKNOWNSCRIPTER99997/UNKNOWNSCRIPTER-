@@ -1,0 +1,255 @@
+ -- [[ MOBILE FULLY FUNCTIONAL MOD MENU ]] --
+-- [[ CREDITS: UNKNOWNSCRIPTER ]] --
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+
+-- [[ CORE UI SETUP ]] --
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MobileModMenu"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+
+-- [[ SCREEN TOGGLE BUTTON ]] --
+local MenuOpenButton = Instance.new("TextButton")
+MenuOpenButton.Name = "MenuOpenButton"
+MenuOpenButton.Parent = ScreenGui
+MenuOpenButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+MenuOpenButton.Position = UDim2.new(0, 10, 0, 40)
+MenuOpenButton.Size = UDim2.new(0, 110, 0, 40)
+MenuOpenButton.Font = Enum.Font.SourceSansBold
+MenuOpenButton.Text = "Toggle Menu"
+MenuOpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MenuOpenButton.TextSize = 18
+local UICornerBtn = Instance.new("UICorner")
+UICornerBtn.CornerRadius = UDim.new(0, 8)
+UICornerBtn.Parent = MenuOpenButton
+
+-- [[ MAIN FRAME ]] --
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+MainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 240, 0, 190) -- Size adjusted back to clean layout
+MainFrame.Visible = true
+
+local UICornerMain = Instance.new("UICorner")
+UICornerMain.CornerRadius = UDim.new(0, 8)
+UICornerMain.Parent = MainFrame
+
+-- [[ TOP BAR ]] --
+local TopBar = Instance.new("Frame")
+TopBar.Name = "TopBar"
+TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+
+local UICornerTop = Instance.new("UICorner")
+UICornerTop.CornerRadius = UDim.new(0, 8)
+UICornerTop.Parent = TopBar
+
+local Title = Instance.new("TextLabel")
+Title.Parent = TopBar
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, 0, 1, 0)
+Title.Font = Enum.Font.SourceSansBold
+Title.Text = "  MENU | by UNKNOWNSCRIPTER"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- [[ CONTAINER FOR BUTTONS ]] --
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Parent = MainFrame
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.Position = UDim2.new(0, 0, 0, 50)
+ContentFrame.Size = UDim2.new(1, 0, 1, -50)
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = ContentFrame
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.Padding = UDim.new(0, 10)
+
+-- [[ TOGGLE VARIABLES ]] --
+local EspEnabled = false
+local AimbotEnabled = false
+local IsTouching = false
+
+-- [[ FUNCTION: CREATE TOGGLES ]] --
+local function CreateToggle(name, defaultState, callback)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(0, 210, 0, 45)
+    Button.Parent = ContentFrame
+    Button.Font = Enum.Font.SourceSansBold
+    Button.TextSize = 18
+    
+    local function updateVisuals(state)
+        if state then
+            Button.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+            Button.Text = name .. ": ON"
+        else
+            Button.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
+            Button.Text = name .. ": OFF"
+        end
+        Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+    
+    local state = defaultState
+    updateVisuals(state)
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.Parent = Button
+
+    Button.MouseButton1Click:Connect(function()
+        state = not state
+        updateVisuals(state)
+        callback(state)
+    end)
+end
+
+MenuOpenButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- [[ MOBILE DRAG ENGINE ]] --
+local dragging = false
+local dragStart = Vector3.new()
+local startPos = UDim2.new()
+
+TopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.MouseBehavior) then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(
+            startPos.X.Scale, 
+            startPos.X.Offset + delta.X, 
+            startPos.Y.Scale, 
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- [[ WALL CHECK FUNCTION ]] --
+local function IsVisible(targetPart)
+    if not LocalPlayer.Character then return false end
+    
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, Camera}
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+
+    local origin = Camera.CFrame.Position
+    local direction = targetPart.Position - origin
+    
+    local raycastResult = workspace:Raycast(origin, direction, raycastParams)
+    
+    if not raycastResult or raycastResult.Instance:IsDescendantOf(targetPart.Parent) then
+        return true
+    end
+    return false
+end
+
+-- [[ 1. ESP ENGINE ]] --
+local function ApplyESP(player)
+    if player == LocalPlayer then return end
+    
+    local function setupCharacter(char)
+        if char:FindFirstChild("ESPHighlight") then char.ESPHighlight:Destroy() end
+        
+        local Highlight = Instance.new("Highlight")
+        Highlight.Name = "ESPHighlight"
+        Highlight.Parent = char
+        Highlight.FillColor = Color3.fromRGB(255, 0, 0)
+        Highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+        Highlight.FillTransparency = 0.5
+        Highlight.Enabled = EspEnabled
+    end
+
+    if player.Character then setupCharacter(player.Character) end
+    player.CharacterAdded:Connect(setupCharacter)
+end
+
+for _, p in ipairs(Players:GetPlayers()) do ApplyESP(p) end
+Players.PlayerAdded:Connect(ApplyESP)
+
+CreateToggle("ESP", false, function(state)
+    EspEnabled = state
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p.Character and p.Character:FindFirstChild("ESPHighlight") then
+            p.Character.ESPHighlight.Enabled = state
+        end
+    end
+end)
+
+-- [[ 2. DISTANCE-BASED AIMBOT ENGINE ]] --
+local function GetClosestPlayerToMe()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+    
+    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then 
+        return nil 
+    end
+    
+    local myPos = LocalPlayer.Character.HumanoidRootPart.Position
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+            
+            local _, onScreen = Camera:WorldToViewportPoint(player.Character.Head.Position)
+            if onScreen and IsVisible(player.Character.Head) then
+                local enemyPos = player.Character.Head.Position
+                local distance = (enemyPos - myPos).Magnitude
+                
+                if distance < shortestDistance then
+                    closestPlayer = player
+                    shortestDistance = distance
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+CreateToggle("Aimbot", false, function(state)
+    AimbotEnabled = state
+end)
+
+-- Detect Touch Inputs
+UserInputService.InputBegan:Connect(function(input, processed)
+    if not processed and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1) then
+        IsTouching = true
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        IsTouching = false
+    end
+end)
+
+-- Combat Tracking Loop
+RunService.RenderStepped:Connect(function()
+    if AimbotEnabled and IsTouching then
+        local target = GetClosestPlayerToMe()
+        if target and target.Character and target.Character:FindFirstChild("Head") then
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position)
+        end
+    end
+end)
